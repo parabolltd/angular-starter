@@ -65,8 +65,8 @@ module.exports = function (options) {
     entry: {
 
       'polyfills': './src/polyfills.browser.ts',
-      'main':      AOT ? './src/main.browser.aot.ts' :
-                  './src/main.browser.ts'
+      'main': AOT ? './src/main.browser.aot.ts' :
+        './src/main.browser.ts'
 
     },
 
@@ -82,7 +82,7 @@ module.exports = function (options) {
        *
        * See: http://webpack.github.io/docs/configuration.html#resolve-extensions
        */
-      extensions: ['.ts', '.js', '.json'],
+      extensions: ['.ts', '.js', '.json', '.less'],
 
       /**
        * An array of directory names to be resolved to the current directory
@@ -170,6 +170,17 @@ module.exports = function (options) {
         },
 
         /**
+         * To string and sass loader support for *.less files (from Angular components)
+         * Returns compiled css content as string
+         *
+         */
+        {
+          test: /\.less$/,
+          loaders: ['raw-loader', 'less-loader'],
+          exclude: /node_modules/
+        },
+
+        /**
          * Raw loader support for *.html
          * Returns file content as string
          *
@@ -185,16 +196,21 @@ module.exports = function (options) {
          * File loader for supporting images, for example, in CSS files.
          */
         {
-          test: /\.(jpg|png|gif)$/,
+          test: /\.(jpg|jpeg|png|gif)$/,
           use: 'file-loader'
         },
 
         /* File loader for supporting fonts, for example, in CSS files.
         */
+        // {
+        //   test: /\.(eot|woff2?|svg|ttf)([\?]?.*)$/,
+        //   use: 'file-loader'
+        // }, 
         {
-          test: /\.(eot|woff2?|svg|ttf)([\?]?.*)$/,
-          use: 'file-loader'
+          test: /\.(woff2)(\?|$)/,
+          loader: 'url-loader?limit=10000&mimetype=application/font-woff2'
         }
+
 
       ],
 
@@ -208,7 +224,7 @@ module.exports = function (options) {
     plugins: [
       // Remove all locale files in moment with the IgnorePlugin if you don't need them
       // new IgnorePlugin(/^\.\/locale$/, /moment$/),
-      
+
       // Use for DLLs
       // new AssetsPlugin({
       //   path: helpers.root('dist'),
@@ -284,9 +300,9 @@ module.exports = function (options) {
        */
       new CopyWebpackPlugin([
         { from: 'src/assets', to: 'assets' },
-        { from: 'src/meta'}
+        { from: 'src/meta' }
       ],
-        isProd ? { ignore: [ 'mock-data/**/*' ] } : undefined
+        isProd ? { ignore: ['mock-data/**/*'] } : undefined
       ),
 
       /*
@@ -320,20 +336,20 @@ module.exports = function (options) {
         template: 'src/index.html',
         title: METADATA.title,
         chunksSortMode: function (a, b) {
-          const entryPoints = ["inline","polyfills","sw-register","styles","vendor","main"];
+          const entryPoints = ["inline", "polyfills", "sw-register", "styles", "vendor", "main"];
           return entryPoints.indexOf(a.names[0]) - entryPoints.indexOf(b.names[0]);
         },
         metadata: METADATA,
         inject: 'body'
       }),
 
-       /**
-       * Plugin: ScriptExtHtmlWebpackPlugin
-       * Description: Enhances html-webpack-plugin functionality
-       * with different deployment options for your scripts including:
-       *
-       * See: https://github.com/numical/script-ext-html-webpack-plugin
-       */
+      /**
+      * Plugin: ScriptExtHtmlWebpackPlugin
+      * Description: Enhances html-webpack-plugin functionality
+      * with different deployment options for your scripts including:
+      *
+      * See: https://github.com/numical/script-ext-html-webpack-plugin
+      */
       new ScriptExtHtmlWebpackPlugin({
         sync: /polyfills|vendor/,
         defaultAttribute: 'async',
